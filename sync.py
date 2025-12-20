@@ -41,19 +41,16 @@ ALLOWED_REPOS: list[str | tuple[str, str]] = [
     # Core Buildkite tools
     ("agent", "v3.115.2"),
     ("cli", "v3.16.0"),
-
     # Documentation
     ("docs", "86bbdc9"),
-
     # Kubernetes
     ("agent-stack-k8s", "v0.36.1"),
-
     # AWS infrastructure
     ("elastic-ci-stack-for-aws", "v6.52.0"),
+    ("buildkite-agent-scaler", "v1.10.0"),
     ("terraform-buildkite-elastic-ci-stack-for-aws", "v0.6.2"),
     ("elastic-ci-stack-s3-secrets-hooks", "v2.8.0"),
     ("lifecycled", "v3.5.0"),
-
     # Python SDK & tools
     ("buildkite-sdk", "v0.6.0"),  # Multi-language SDK (includes Python)
     ("test-collector-python", "v1.2.0"),
@@ -64,9 +61,11 @@ ALLOWED_REPOS: list[str | tuple[str, str]] = [
 # Configuration
 # =============================================================================
 
+
 @dataclass
 class RepoConfig:
     """Configuration for a repository."""
+
     name: str
     ref: str | None = None  # None means track latest
 
@@ -86,6 +85,7 @@ def get_repo_configs() -> list[RepoConfig]:
     """Get parsed repo configurations from the allowlist."""
     return [parse_repo_config(entry) for entry in ALLOWED_REPOS]
 
+
 GITHUB_ORG = "buildkite"
 GITHUB_BASE_URL = f"https://github.com/{GITHUB_ORG}"
 SUBMODULE_DIR = Path("repos")
@@ -93,7 +93,9 @@ SUBMODULE_DIR = Path("repos")
 console = Console()
 
 
-def run_git(*args: str, check: bool = True, capture: bool = False) -> subprocess.CompletedProcess:
+def run_git(
+    *args: str, check: bool = True, capture: bool = False
+) -> subprocess.CompletedProcess:
     """Run a git command."""
     cmd = ["git", *args]
     return subprocess.run(
@@ -154,7 +156,9 @@ def add_submodule(repo_name: str, dry_run: bool = False) -> tuple[str, bool, str
         return (repo_name, False, e.stderr.strip() or str(e))
 
 
-def add_submodules(repos: set[str], dry_run: bool = False) -> list[tuple[str, bool, str]]:
+def add_submodules(
+    repos: set[str], dry_run: bool = False
+) -> list[tuple[str, bool, str]]:
     """Add submodules sequentially with progress display."""
     results: list[tuple[str, bool, str]] = []
 
@@ -178,7 +182,9 @@ def add_submodules(repos: set[str], dry_run: bool = False) -> list[tuple[str, bo
     return results
 
 
-def remove_submodule(repo_name: str, path: Path, dry_run: bool = False) -> tuple[str, bool, str]:
+def remove_submodule(
+    repo_name: str, path: Path, dry_run: bool = False
+) -> tuple[str, bool, str]:
     """Remove a submodule that's no longer in the allowlist."""
     if dry_run:
         return (repo_name, True, "would remove")
@@ -204,7 +210,9 @@ def remove_submodule(repo_name: str, path: Path, dry_run: bool = False) -> tuple
         return (repo_name, False, str(e))
 
 
-def update_submodule(config: RepoConfig, dry_run: bool = False) -> tuple[str, bool, str]:
+def update_submodule(
+    config: RepoConfig, dry_run: bool = False
+) -> tuple[str, bool, str]:
     """Update a single submodule. Returns (repo_name, success, message)."""
     path = SUBMODULE_DIR / config.name
 
@@ -245,7 +253,9 @@ def update_submodule(config: RepoConfig, dry_run: bool = False) -> tuple[str, bo
         return (config.name, False, e.stderr.strip() or str(e))
 
 
-def update_submodules(configs: list[RepoConfig], dry_run: bool = False) -> list[tuple[str, bool, str]]:
+def update_submodules(
+    configs: list[RepoConfig], dry_run: bool = False
+) -> list[tuple[str, bool, str]]:
     """Update all submodules based on their config."""
     results: list[tuple[str, bool, str]] = []
 
@@ -256,7 +266,15 @@ def update_submodules(configs: list[RepoConfig], dry_run: bool = False) -> list[
     if not dry_run:
         jobs = os.cpu_count() or 4
         try:
-            run_git("submodule", "update", "--init", "--recursive", "--jobs", str(jobs), capture=True)
+            run_git(
+                "submodule",
+                "update",
+                "--init",
+                "--recursive",
+                "--jobs",
+                str(jobs),
+                capture=True,
+            )
         except subprocess.CalledProcessError:
             pass  # Continue anyway, individual updates will report errors
 
@@ -279,7 +297,7 @@ def print_results_table(
     """Print a styled results table."""
     table = Table(title=title, show_header=True, header_style="bold magenta")
     table.add_column("Repository", style="cyan")
-    table.add_column(action, justify="center")
+    table.add_column(action, justify="left")
 
     for repo_name, success, message in sorted(results, key=lambda x: x[0]):
         if success:
@@ -309,7 +327,9 @@ def sync(dry_run: bool = False) -> int:
     # Ensure we're in a git repository
     result = run_git("rev-parse", "--git-dir", capture=True, check=False)
     if result.returncode != 0:
-        console.print("[red]Error:[/red] Not a git repository. Please run 'git init' first.")
+        console.print(
+            "[red]Error:[/red] Not a git repository. Please run 'git init' first."
+        )
         return 1
 
     ensure_repos_dir()

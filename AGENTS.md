@@ -21,6 +21,7 @@ buildkite-knowledge-base/
 └── repos/               # Submodules directory
     ├── agent/
     ├── agent-stack-k8s/
+    ├── buildkite-agent-scaler/
     ├── buildkite-sdk/
     ├── cli/
     ├── docs/
@@ -102,6 +103,20 @@ CloudFormation template for deploying an autoscaling Buildkite agent cluster in 
 - `templates/` - CloudFormation templates
 - `packer/` - AMI build configurations
 - `plugins/` - Bundled Buildkite plugins
+
+---
+
+#### `repos/buildkite-agent-scaler/` - Agent Scaler Lambda
+**Language:** Go | **Version:** v1.10.0
+
+AWS Lambda function that scales an Auto Scaling Group based on Buildkite queue metrics. Provides 300% faster scale-up from zero compared to native ASG rules by polling the Buildkite Metrics API every 10 seconds.
+
+**Key features:**
+- Availability-based scaling with configurable thresholds
+- Graceful scale-in support with Elastic CI Stack integration
+- Optional CloudWatch metrics publishing
+
+**Required env vars:** `BUILDKITE_AGENT_TOKEN`, `BUILDKITE_QUEUE`, `AGENTS_PER_INSTANCE`, `ASG_NAME`
 
 ---
 
@@ -226,6 +241,7 @@ Remove it from `ALLOWED_REPOS` in `sync.py` and run `uv run sync.py`. The submod
 | Configure agent | `agent` | `clicommand/agent_start.go` |
 | Add pipeline step | `buildkite-sdk` | `python/src/buildkite_sdk/` |
 | Customize AWS stack | `elastic-ci-stack-for-aws` | `templates/aws-stack.yml` |
+| Configure ASG scaling | `buildkite-agent-scaler` | `scaler/` |
 | K8s pod templates | `agent-stack-k8s` | `charts/agent-stack-k8s/values.yaml` |
 | Add S3 secret | `elastic-ci-stack-s3-secrets-hooks` | `hooks/environment` |
 | Handle spot interruption | `lifecycled` | `handler/` |
