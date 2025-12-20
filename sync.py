@@ -225,7 +225,7 @@ def update_submodule(
         return (config.name, True, "would pull latest")
 
     try:
-        if config.is_pinned:
+        if config.is_pinned and config.ref is not None:
             # Checkout the specific ref
             subprocess.run(
                 ["git", "-C", str(path), "fetch", "--all", "--tags"],
