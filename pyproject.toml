@@ -1,0 +1,10 @@
+[project]
+name = "buildkite-knowledge-base"
+version = "0.1.0"
+description = "A monorepository of Buildkite GitHub projects for agent utilization"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = ["rich>=13.0.0"]
+
+[dependency-groups]
+dev = []

@@ -1,0 +1,36 @@
+[submodule "repos/agent"]
+path = repos/agent
+url = https://github.com/buildkite/agent.git
+
+[submodule "repos/cli"]
+	path = repos/cli
+	url = https://github.com/buildkite/cli.git
+
+[submodule "repos/python-buildkite"]
+path = repos/python-buildkite
+url = https://github.com/buildkite/python-buildkite.git
+
+[submodule "repos/agent-stack-k8s"]
+	path = repos/agent-stack-k8s
+	url = https://github.com/buildkite/agent-stack-k8s.git
+[submodule "repos/buildkite-sdk"]
+	path = repos/buildkite-sdk
+	url = https://github.com/buildkite/buildkite-sdk.git
+[submodule "repos/elastic-ci-stack-for-aws"]
+	path = repos/elastic-ci-stack-for-aws
+	url = https://github.com/buildkite/elastic-ci-stack-for-aws.git
+[submodule "repos/elastic-ci-stack-s3-secrets-hooks"]
+	path = repos/elastic-ci-stack-s3-secrets-hooks
+	url = https://github.com/buildkite/elastic-ci-stack-s3-secrets-hooks.git
+[submodule "repos/lifecycled"]
+	path = repos/lifecycled
+	url = https://github.com/buildkite/lifecycled.git
+[submodule "repos/terraform-buildkite-elastic-ci-stack-for-aws"]
+	path = repos/terraform-buildkite-elastic-ci-stack-for-aws
+	url = https://github.com/buildkite/terraform-buildkite-elastic-ci-stack-for-aws.git
+[submodule "repos/test-collector-python"]
+	path = repos/test-collector-python
+	url = https://github.com/buildkite/test-collector-python.git
+[submodule "repos/docs"]
+	path = repos/docs
+	url = https://github.com/buildkite/docs.git
