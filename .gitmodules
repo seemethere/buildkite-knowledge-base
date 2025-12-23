@@ -37,3 +37,6 @@ url = https://github.com/buildkite/python-buildkite.git
 [submodule "repos/buildkite-agent-scaler"]
 	path = repos/buildkite-agent-scaler
 	url = https://github.com/buildkite/buildkite-agent-scaler.git
+[submodule "repos/test-engine-client"]
+	path = repos/test-engine-client
+	url = https://github.com/buildkite/test-engine-client.git

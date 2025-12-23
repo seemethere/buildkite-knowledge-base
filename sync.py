@@ -54,6 +54,7 @@ ALLOWED_REPOS: list[str | tuple[str, str]] = [
     # Python SDK & tools
     ("buildkite-sdk", "v0.6.0"),  # Multi-language SDK (includes Python)
     ("test-collector-python", "v1.2.0"),
+    ("test-engine-client", "v2.0.1")
 ]
 
 
