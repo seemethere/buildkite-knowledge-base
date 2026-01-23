@@ -31,10 +31,12 @@ from rich.text import Text
 # Add or remove repositories here to manage which Buildkite repos are synced.
 #
 # Format:
-#   "repo-name"                    -> Track latest default branch
-#   ("repo-name", "v1.2.3")        -> Pin to a tag
+#   "repo-name"                    -> Track latest default branch (from buildkite org)
+#   ("repo-name", "v1.2.3")        -> Pin to a tag (from buildkite org)
 #   ("repo-name", "abc123")        -> Pin to a commit SHA
 #   ("repo-name", "refs/heads/x")  -> Pin to a specific branch
+#   "org/repo-name"                -> External repo (track latest)
+#   ("org/repo-name", "v1.0.0")    -> External repo pinned to a version
 # =============================================================================
 
 ALLOWED_REPOS: list[str | tuple[str, str]] = [
@@ -54,7 +56,9 @@ ALLOWED_REPOS: list[str | tuple[str, str]] = [
     # Python SDK & tools
     ("buildkite-sdk", "v0.6.0"),  # Multi-language SDK (includes Python)
     ("test-collector-python", "v1.2.0"),
-    ("test-engine-client", "v2.0.1")
+    ("test-engine-client", "v2.0.1"),
+    # Infrastructure as Code
+    ("pulumiverse/pulumi-buildkite", "v3.1.6"),
 ]
 
 
@@ -67,19 +71,33 @@ ALLOWED_REPOS: list[str | tuple[str, str]] = [
 class RepoConfig:
     """Configuration for a repository."""
 
-    name: str
+    name: str  # Local name (repo name only, used for submodule path)
     ref: str | None = None  # None means track latest
+    org: str = "buildkite"  # GitHub organization
 
     @property
     def is_pinned(self) -> bool:
         return self.ref is not None
 
+    @property
+    def github_url(self) -> str:
+        return f"https://github.com/{self.org}/{self.name}.git"
+
 
 def parse_repo_config(entry: str | tuple[str, str]) -> RepoConfig:
     """Parse an allowlist entry into a RepoConfig."""
     if isinstance(entry, str):
+        # Check if it's an external repo (org/repo format)
+        if "/" in entry:
+            org, name = entry.split("/", 1)
+            return RepoConfig(name=name, org=org)
         return RepoConfig(name=entry)
-    return RepoConfig(name=entry[0], ref=entry[1])
+    # Tuple format: (repo, ref) or (org/repo, ref)
+    repo_part, ref = entry
+    if "/" in repo_part:
+        org, name = repo_part.split("/", 1)
+        return RepoConfig(name=name, ref=ref, org=org)
+    return RepoConfig(name=repo_part, ref=ref)
 
 
 def get_repo_configs() -> list[RepoConfig]:
@@ -130,16 +148,16 @@ def get_existing_submodules() -> dict[str, Path]:
     return submodules
 
 
-def add_submodule(repo_name: str, dry_run: bool = False) -> tuple[str, bool, str]:
+def add_submodule(config: RepoConfig, dry_run: bool = False) -> tuple[str, bool, str]:
     """Add a submodule. Returns (repo_name, success, message)."""
-    url = f"{GITHUB_BASE_URL}/{repo_name}.git"
-    path = SUBMODULE_DIR / repo_name
+    url = config.github_url
+    path = SUBMODULE_DIR / config.name
 
     if path.exists() and any(path.iterdir()):
-        return (repo_name, False, "already exists")
+        return (config.name, False, "already exists")
 
     if dry_run:
-        return (repo_name, True, "would add")
+        return (config.name, True, "would add")
 
     try:
         # Remove empty directory if it exists (leftover from failed attempt)
@@ -152,32 +170,32 @@ def add_submodule(repo_name: str, dry_run: bool = False) -> tuple[str, bool, str
             capture_output=True,
             text=True,
         )
-        return (repo_name, True, "added")
+        return (config.name, True, "added")
     except subprocess.CalledProcessError as e:
-        return (repo_name, False, e.stderr.strip() or str(e))
+        return (config.name, False, e.stderr.strip() or str(e))
 
 
 def add_submodules(
-    repos: set[str], dry_run: bool = False
+    configs: list[RepoConfig], dry_run: bool = False
 ) -> list[tuple[str, bool, str]]:
     """Add submodules sequentially with progress display."""
     results: list[tuple[str, bool, str]] = []
 
-    if not repos:
+    if not configs:
         return results
 
-    sorted_repos = sorted(repos)
+    sorted_configs = sorted(configs, key=lambda c: c.name)
 
     with Progress(
         SpinnerColumn(),
         TextColumn("[progress.description]{task.description}"),
         console=console,
     ) as progress:
-        for repo_name in sorted_repos:
+        for config in sorted_configs:
             progress.update(
-                progress.add_task(f"[cyan]Adding {repo_name}...", total=None),
+                progress.add_task(f"[cyan]Adding {config.name}...", total=None),
             )
-            result = add_submodule(repo_name, dry_run)
+            result = add_submodule(config, dry_run)
             results.append(result)
 
     return results
@@ -370,7 +388,8 @@ def sync(dry_run: bool = False) -> int:
 
     # Add new submodules
     if to_add:
-        results = add_submodules(to_add, dry_run)
+        configs_to_add = [config_by_name[name] for name in to_add]
+        results = add_submodules(configs_to_add, dry_run)
         print_results_table("Added Repositories", results, "Status")
 
     # Remove old submodules

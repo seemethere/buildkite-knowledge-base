@@ -40,3 +40,6 @@ url = https://github.com/buildkite/python-buildkite.git
 [submodule "repos/test-engine-client"]
 	path = repos/test-engine-client
 	url = https://github.com/buildkite/test-engine-client.git
+[submodule "repos/pulumi-buildkite"]
+	path = repos/pulumi-buildkite
+	url = https://github.com/pulumiverse/pulumi-buildkite.git
