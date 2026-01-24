@@ -43,3 +43,6 @@ url = https://github.com/buildkite/python-buildkite.git
 [submodule "repos/pulumi-buildkite"]
 	path = repos/pulumi-buildkite
 	url = https://github.com/pulumiverse/pulumi-buildkite.git
+[submodule "repos/terraform-provider-buildkite"]
+	path = repos/terraform-provider-buildkite
+	url = https://github.com/buildkite/terraform-provider-buildkite.git
