@@ -58,7 +58,7 @@ ALLOWED_REPOS: list[str | tuple[str, str]] = [
     ("test-collector-python", "v1.2.0"),
     ("test-engine-client", "v2.0.1"),
     # Infrastructure as Code
-    ("pulumiverse/pulumi-buildkite", "v3.1.6"),
+    ("pulumiverse/pulumi-buildkite", "v3.2.0"),
     ("terraform-provider-buildkite", "v1.29.0"),
 ]
 
