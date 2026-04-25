@@ -1,0 +1,17 @@
+{
+  "name": "buildkite-diagnose",
+  "version": "0.1.0",
+  "description": "Diagnose Buildkite build failures with pi",
+  "keywords": ["pi-package", "buildkite", "diagnose", "ci"],
+  "author": "Buildkite",
+  "license": "MIT",
+  "pi": {
+    "extensions": ["./extensions"],
+    "skills": ["./skills"]
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@mariozechner/pi-coding-agent": "^0.68.0",
+    "@sinclair/typebox": "^0.34.0"
+  }
+}
